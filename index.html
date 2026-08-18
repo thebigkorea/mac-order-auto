@@ -718,21 +718,7 @@ tbody tr:hover td {
       </div>
 
 
-      <div class="worker-row">
-
-        <label for="workerName">
-          조사자
-        </label>
-
-        <input
-          type="text"
-          id="workerName"
-          placeholder="재고를 조사한 직원 이름"
-        >
-
-      </div>
-
-
+      
       <div class="table-wrap">
 
         <table>
@@ -1464,21 +1450,7 @@ async function calculateInventory() {
   }
 
 
-  const workerName =
-    document.getElementById(
-      "workerName"
-    ).value.trim();
-
-
-  if (!workerName) {
-
-    alert(
-      "재고 조사자 이름을 입력해 주세요."
-    );
-
-    return;
-  }
-
+  
 
   
   const notEntered =
@@ -1529,7 +1501,7 @@ async function calculateInventory() {
               action:
                 "saveInventory",
 
-              workerName,
+              
 
               items:
                 inventoryItems
@@ -2038,21 +2010,7 @@ async function confirmOrder() {
   }
 
 
-  const workerName =
-    document.getElementById(
-      "workerName"
-    ).value.trim();
-
-
-  if (!workerName) {
-
-    alert(
-      "작성자 이름을 입력해 주세요."
-    );
-
-    return;
-  }
-
+  
 
   const orderItems =
     inventoryItems.filter(
@@ -2119,7 +2077,7 @@ async function confirmOrder() {
               stockType:
                 pageData.stockType,
 
-              workerName,
+              
 
               remark:
                 document.getElementById(
