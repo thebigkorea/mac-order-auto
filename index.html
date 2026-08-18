@@ -791,13 +791,14 @@ tbody tr:hover td {
       </div>
 
 
-      <div class="notice">
-        <strong>사용방법</strong><br>
-        모든 품목의 현재재고를 입력한 뒤
-        「재고조사 저장 · 자동계산」을 누르면
-        적정재고와 비교하여 권장발주량이 자동 계산됩니다.
-        실제 발주수량은 필요하면 직접 수정할 수 있습니다.
-      </div>
+      <div class="guide-box">
+  <strong>사용방법</strong>
+  <div>
+    각 품목의 현재재고를 입력한 후
+    「재고조사 저장 · 발주계산」을 눌러주세요.
+    적정재고와 비교하여 필요한 발주수량이 자동 계산됩니다.
+  </div>
+</div>
 
 
       
@@ -1259,6 +1260,8 @@ async function loadPageData() {
     renderInventory();
 
     await loadStockSettings();
+
+    await loadInventoryDraft();
 
 
     setInventoryStatus(
@@ -2345,6 +2348,19 @@ async function confirmOrder() {
       );
     }
 
+    await fetch(
+  API_URL,
+  {
+    method: "POST",
+
+    body:
+      JSON.stringify({
+        action:
+          "deleteInventoryDraft"
+      })
+  }
+);
+
 
     lastOrderText =
       result.orderText || "";
@@ -2607,6 +2623,173 @@ function escapeJs(
       /'/g,
       "\\'"
     );
+}
+
+async function saveInventoryDraft() {
+
+  const enteredItems =
+    inventoryItems.filter(function(item) {
+
+      return (
+        item.currentStock !== "" &&
+        item.currentStock !== null &&
+        item.currentStock !== undefined
+      );
+    });
+
+  if (!enteredItems.length) {
+
+    alert(
+      "임시저장할 현재재고가 없습니다."
+    );
+
+    return;
+  }
+
+  setInventoryStatus(
+    "현재 입력한 재고를 임시저장하는 중입니다..."
+  );
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            JSON.stringify({
+              action:
+                "saveInventoryDraft",
+
+              items:
+                enteredItems.map(
+                  function(item) {
+
+                    return {
+                      code:
+                        item.code,
+
+                      currentStock:
+                        item.currentStock
+                    };
+                  }
+                )
+            })
+        }
+      );
+
+    const result =
+      await response.json();
+
+    if (!result.success) {
+
+      throw new Error(
+        result.message ||
+        "임시저장 실패"
+      );
+    }
+
+    setInventoryStatus(
+      "임시저장 완료 · " +
+      result.savedCount +
+      "개 품목",
+      "success"
+    );
+
+    alert(
+      "현재까지 입력한 재고가 임시저장되었습니다."
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    setInventoryStatus(
+      "임시저장 중 오류가 발생했습니다. " +
+      error.message,
+      "error"
+    );
+  }
+}
+
+async function loadInventoryDraft() {
+
+  try {
+
+    const url =
+      API_URL +
+      "?action=getInventoryDraft" +
+      "&t=" +
+      Date.now();
+
+    const response =
+      await fetch(url);
+
+    const result =
+      await response.json();
+
+    if (!result.success) {
+
+      throw new Error(
+        result.message ||
+        "임시저장 조회 실패"
+      );
+    }
+
+    if (!result.hasDraft) {
+      return;
+    }
+
+    const draftMap =
+      new Map();
+
+    (result.items || [])
+      .forEach(function(item) {
+
+        draftMap.set(
+          item.code,
+          item.currentStock
+        );
+      });
+
+    inventoryItems =
+      inventoryItems.map(
+        function(item) {
+
+          if (
+            !draftMap.has(
+              item.code
+            )
+          ) {
+            return item;
+          }
+
+          return {
+            ...item,
+            currentStock:
+              draftMap.get(
+                item.code
+              )
+          };
+        }
+      );
+
+    renderInventory();
+
+    setInventoryStatus(
+      "오늘 임시저장한 재고를 불러왔습니다.",
+      "success"
+    );
+
+  } catch (error) {
+
+    console.error(
+      "임시저장 불러오기 오류",
+      error
+    );
+  }
 }
 
 </script>
