@@ -1,0 +1,2464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+>
+<title>한국의집 MAC 재고·발주 자동관리</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Noto Sans KR",
+    "Malgun Gothic",
+    Arial,
+    sans-serif;
+
+  background: #f4f6f9;
+  color: #172033;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.container {
+  width: min(1440px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 26px 0 50px;
+}
+
+
+/* =========================
+   제목
+========================= */
+
+.page-header {
+  margin-bottom: 18px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: -1.2px;
+}
+
+.page-header p {
+  margin: 8px 0 0;
+  color: #667085;
+  line-height: 1.6;
+}
+
+
+/* =========================
+   상단 배송정보
+========================= */
+
+.delivery-card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 18px;
+
+  box-shadow:
+    0 8px 24px rgba(16, 24, 40, 0.07);
+}
+
+.info-box {
+  background: #f8fafc;
+  border: 1px solid #e7ebf0;
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.info-label {
+  font-size: 12px;
+  color: #667085;
+  margin-bottom: 6px;
+}
+
+.info-value {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.stock-type-weekday {
+  color: #1769aa;
+}
+
+.stock-type-weekend {
+  color: #d85a00;
+}
+
+
+/* =========================
+   탭
+========================= */
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.tab-button {
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 20px;
+
+  background: #e8edf3;
+  color: #344054;
+
+  font-weight: 800;
+}
+
+.tab-button.active {
+  background: #111827;
+  color: #fff;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+
+/* =========================
+   카드
+========================= */
+
+.card {
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+
+  box-shadow:
+    0 8px 24px rgba(16, 24, 40, 0.07);
+}
+
+.card-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid #eaecf0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.card-description {
+  margin: 5px 0 0;
+  font-size: 13px;
+  color: #667085;
+  line-height: 1.5;
+}
+
+
+/* =========================
+   버튼
+========================= */
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: 0;
+  border-radius: 11px;
+  min-height: 44px;
+  padding: 10px 16px;
+
+  font-weight: 800;
+}
+
+.btn-primary {
+  background: #111827;
+  color: #fff;
+}
+
+.btn-blue {
+  background: #2563eb;
+  color: #fff;
+}
+
+.btn-green {
+  background: #18864b;
+  color: #fff;
+}
+
+.btn-light {
+  background: #eef2f6;
+  color: #253044;
+}
+
+.btn-warning {
+  background: #fff3cd;
+  color: #7a5100;
+  border: 1px solid #ead292;
+}
+
+
+/* =========================
+   안내
+========================= */
+
+.notice {
+  margin: 16px 20px;
+  border-radius: 12px;
+  padding: 13px 15px;
+
+  background: #f8fafc;
+  border: 1px solid #e4e9ef;
+
+  color: #475467;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.notice strong {
+  color: #111827;
+}
+
+.notice.warning {
+  background: #fff8e8;
+  border-color: #efd79b;
+  color: #715100;
+}
+
+
+/* =========================
+   작업자
+========================= */
+
+.worker-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 12px;
+  align-items: center;
+
+  padding: 0 20px 18px;
+}
+
+.worker-row label {
+  font-weight: 800;
+}
+
+.worker-row input,
+.worker-row textarea {
+  width: 100%;
+
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+
+  padding: 11px 13px;
+  font-size: 15px;
+}
+
+.worker-row input {
+  height: 44px;
+}
+
+.worker-row textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+
+/* =========================
+   표
+========================= */
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1050px;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+
+  background: #eef2f6;
+  color: #273142;
+
+  border-bottom: 1px solid #dfe4ea;
+
+  padding: 13px 8px;
+  text-align: center;
+
+  font-size: 14px;
+  font-weight: 900;
+}
+
+tbody td {
+  border-bottom: 1px solid #edf0f3;
+  padding: 10px 8px;
+  vertical-align: middle;
+}
+
+tbody tr:hover td {
+  background: #fafbfd;
+}
+
+.col-code {
+  width: 92px;
+  text-align: center;
+  color: #667085;
+  font-size: 12px;
+}
+
+.col-name {
+  min-width: 310px;
+  font-weight: 700;
+}
+
+.col-number {
+  width: 130px;
+  text-align: center;
+}
+
+.col-unit {
+  width: 80px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.stock-input,
+.order-input,
+.setting-input {
+  width: 100%;
+  max-width: 100px;
+  height: 40px;
+
+  border: 1px solid #cfd6df;
+  border-radius: 9px;
+
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.stock-input:focus,
+.order-input:focus,
+.setting-input:focus {
+  outline: 2px solid #9bc4ff;
+  border-color: #4387e8;
+}
+
+.target-stock {
+  font-weight: 900;
+}
+
+.recommended {
+  display: inline-flex;
+  min-width: 58px;
+  min-height: 34px;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 10px;
+  border-radius: 9px;
+
+  background: #edf2f7;
+  font-weight: 900;
+}
+
+.recommended.need-order {
+  background: #fff0e6;
+  color: #c2410c;
+}
+
+.recommended.ok {
+  background: #eaf8ef;
+  color: #167142;
+}
+
+.not-configured {
+  color: #b54708;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.setting-input {
+  background: #fff9df;
+}
+
+
+/* =========================
+   상태
+========================= */
+
+.status-bar {
+  margin: 16px 20px 20px;
+  padding: 12px 14px;
+
+  border-radius: 10px;
+  background: #f6f8fa;
+
+  font-size: 13px;
+  color: #475467;
+  line-height: 1.5;
+}
+
+.status-bar.success {
+  background: #eaf8ef;
+  color: #17663b;
+}
+
+.status-bar.error {
+  background: #fff0f0;
+  color: #9b1c1c;
+}
+
+
+/* =========================
+   발주결과
+========================= */
+
+.order-result {
+  margin: 0 20px 20px;
+  padding: 17px;
+
+  background: #f8fafc;
+  border: 1px solid #e4e9ef;
+  border-radius: 12px;
+
+  white-space: pre-wrap;
+  line-height: 1.7;
+
+  display: none;
+}
+
+.order-result.show {
+  display: block;
+}
+
+
+/* =========================
+   로딩
+========================= */
+
+.loading {
+  padding: 45px 20px;
+  text-align: center;
+  color: #667085;
+  font-weight: 700;
+}
+
+
+/* =========================
+   모바일
+========================= */
+
+@media (max-width: 900px) {
+
+  .container {
+    width: min(100% - 16px, 1440px);
+    padding-top: 16px;
+  }
+
+  .page-header h1 {
+    font-size: 27px;
+  }
+
+  .delivery-card {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 12px;
+  }
+
+  .info-value {
+    font-size: 15px;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tab-button {
+    padding: 12px 8px;
+  }
+
+  .worker-row {
+    grid-template-columns: 1fr;
+  }
+
+  .card-header {
+    align-items: flex-start;
+  }
+
+  table {
+    min-width: 950px;
+  }
+
+  .col-name {
+    min-width: 260px;
+  }
+}
+
+@media (max-width: 560px) {
+
+  .delivery-card {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .info-box {
+    padding: 11px;
+  }
+
+  .info-label {
+    font-size: 11px;
+  }
+
+  .info-value {
+    font-size: 14px;
+  }
+
+  .card-header {
+    padding: 15px;
+  }
+
+  .notice {
+    margin: 14px;
+  }
+
+  .worker-row {
+    padding: 0 14px 16px;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <header class="page-header">
+    <h1>한국의집 MAC 재고·발주 자동관리</h1>
+    <p>
+      현재 보유재고를 조사하면 적정재고와 비교하여
+      권장 발주수량을 자동으로 계산합니다.
+    </p>
+  </header>
+
+
+  <!-- 배송정보 -->
+  <section class="delivery-card">
+
+    <div class="info-box">
+      <div class="info-label">발주일</div>
+      <div
+        class="info-value"
+        id="orderDateText"
+      >
+        -
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-label">배송예정일</div>
+      <div
+        class="info-value"
+        id="deliveryDateText"
+      >
+        -
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-label">적정재고 적용기준</div>
+      <div
+        class="info-value"
+        id="stockTypeText"
+      >
+        -
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-label">거래처</div>
+      <div
+        class="info-value"
+        id="vendorText"
+      >
+        MAC
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- 탭 -->
+  <div class="tabs">
+
+    <button
+      class="tab-button active"
+      id="inventoryTabBtn"
+      onclick="openTab('inventory')"
+    >
+      📦 오늘 재고조사·발주
+    </button>
+
+    <button
+      class="tab-button"
+      id="settingTabBtn"
+      onclick="openTab('setting')"
+    >
+      ⚙ 적정재고 설정
+    </button>
+
+  </div>
+
+
+  <!-- =====================================
+       오늘 재고조사
+  ====================================== -->
+
+  <section
+    id="inventoryTab"
+    class="tab-content active"
+  >
+
+    <div class="card">
+
+      <div class="card-header">
+
+        <div>
+          <h2 class="card-title">
+            오늘 재고조사
+          </h2>
+
+          <p class="card-description">
+            현재 실제 보유수량을 입력한 뒤
+            권장발주를 계산하세요.
+          </p>
+        </div>
+
+        <div class="actions">
+
+          <button
+            class="btn btn-light"
+            onclick="showAllItems()"
+          >
+            전체 품목
+          </button>
+
+          <button
+            class="btn btn-warning"
+            onclick="showShortageOnly()"
+          >
+            부족 품목만
+          </button>
+
+          <button
+            class="btn btn-blue"
+            onclick="calculateInventory()"
+          >
+            재고조사 저장 · 자동계산
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="notice">
+        <strong>사용방법</strong><br>
+        모든 품목의 현재재고를 입력한 뒤
+        「재고조사 저장 · 자동계산」을 누르면
+        적정재고와 비교하여 권장발주량이 자동 계산됩니다.
+        실제 발주수량은 필요하면 직접 수정할 수 있습니다.
+      </div>
+
+
+      <div class="worker-row">
+
+        <label for="workerName">
+          조사자
+        </label>
+
+        <input
+          type="text"
+          id="workerName"
+          placeholder="재고를 조사한 직원 이름"
+        >
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>코드</th>
+              <th>품목</th>
+              <th>현재재고</th>
+              <th>적정재고</th>
+              <th>권장발주</th>
+              <th>실제발주</th>
+              <th>단위</th>
+            </tr>
+          </thead>
+
+          <tbody id="inventoryBody">
+
+            <tr>
+              <td
+                colspan="7"
+                class="loading"
+              >
+                품목을 불러오는 중입니다...
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div
+        id="inventoryStatus"
+        class="status-bar"
+      >
+        재고조사 대기 중
+      </div>
+
+
+      <div class="worker-row">
+
+        <label for="remark">
+          발주 비고
+        </label>
+
+        <textarea
+          id="remark"
+          placeholder="거래처에 전달할 요청사항이 있으면 입력하세요."
+        ></textarea>
+
+      </div>
+
+
+      <div
+        style="
+          padding:0 20px 20px;
+          display:flex;
+          gap:10px;
+          flex-wrap:wrap;
+        "
+      >
+
+        <button
+          class="btn btn-green"
+          onclick="confirmOrder()"
+        >
+          최종 발주확정
+        </button>
+
+        <button
+          class="btn btn-light"
+          onclick="copyOrderText()"
+        >
+          발주문 복사
+        </button>
+
+      </div>
+
+
+      <div
+        id="orderResult"
+        class="order-result"
+      ></div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================
+       적정재고 설정
+  ====================================== -->
+
+  <section
+    id="settingTab"
+    class="tab-content"
+  >
+
+    <div class="card">
+
+      <div class="card-header">
+
+        <div>
+          <h2 class="card-title">
+            품목별 적정재고 설정
+          </h2>
+
+          <p class="card-description">
+            주방 운영 경험을 기준으로
+            평일과 주말의 적정 보유수량을 설정합니다.
+          </p>
+        </div>
+
+        <div class="actions">
+
+          <button
+            class="btn btn-primary"
+            onclick="saveStockSettings()"
+          >
+            적정재고 저장
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="notice warning">
+
+        <strong>처음 한 번 꼭 설정해 주세요.</strong><br>
+
+        평일과 주말에 매장에서 유지해야 할
+        적정 보유수량을 입력하세요.
+
+        설정되지 않은 품목은
+        자동 권장발주 계산을 하지 않습니다.
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>코드</th>
+              <th>품목</th>
+              <th>평일 적정재고</th>
+              <th>주말 적정재고</th>
+              <th>단위</th>
+            </tr>
+          </thead>
+
+          <tbody id="settingBody">
+
+            <tr>
+              <td
+                colspan="5"
+                class="loading"
+              >
+                적정재고 정보를 불러오는 중입니다...
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div
+        id="settingStatus"
+        class="status-bar"
+      >
+        적정재고 설정 대기 중
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   Apps Script 웹앱
+===================================================== */
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbwuMbQSaWyTCDHUmYaLESmiDxtGsN0NUegGAQYYEVHZiSC3dk9jV1F2efGdq_jX9Zsa/exec";
+
+
+/* =====================================================
+   상태값
+===================================================== */
+
+let pageData = null;
+
+let inventoryItems = [];
+
+let stockSettingItems = [];
+
+let calculationDone = false;
+
+let shortageMode = false;
+
+let lastOrderText = "";
+
+
+/* =====================================================
+   시작
+===================================================== */
+
+window.addEventListener(
+  "load",
+  function() {
+
+    loadPageData();
+  }
+);
+
+
+/* =====================================================
+   탭
+===================================================== */
+
+function openTab(type) {
+
+  const inventoryTab =
+    document.getElementById(
+      "inventoryTab"
+    );
+
+  const settingTab =
+    document.getElementById(
+      "settingTab"
+    );
+
+  const inventoryBtn =
+    document.getElementById(
+      "inventoryTabBtn"
+    );
+
+  const settingBtn =
+    document.getElementById(
+      "settingTabBtn"
+    );
+
+
+  if (type === "setting") {
+
+    inventoryTab.classList.remove(
+      "active"
+    );
+
+    settingTab.classList.add(
+      "active"
+    );
+
+    inventoryBtn.classList.remove(
+      "active"
+    );
+
+    settingBtn.classList.add(
+      "active"
+    );
+
+    return;
+  }
+
+
+  settingTab.classList.remove(
+    "active"
+  );
+
+  inventoryTab.classList.add(
+    "active"
+  );
+
+  settingBtn.classList.remove(
+    "active"
+  );
+
+  inventoryBtn.classList.add(
+    "active"
+  );
+}
+
+
+/* =====================================================
+   최초 데이터 조회
+===================================================== */
+
+async function loadPageData() {
+
+  setInventoryStatus(
+    "품목과 적정재고 정보를 불러오는 중입니다."
+  );
+
+  try {
+
+    const url =
+      API_URL +
+      "?action=getOrderPageData" +
+      "&t=" +
+      Date.now();
+
+
+    const response =
+      await fetch(url);
+
+
+    const result =
+      await response.json();
+
+
+    if (!result.success) {
+
+      throw new Error(
+        result.message ||
+        "자료 조회 실패"
+      );
+    }
+
+
+    pageData = result;
+
+
+    inventoryItems =
+      (result.items || [])
+        .map(function(item) {
+
+          return {
+            ...item,
+
+            currentStock: "",
+
+            recommendedOrder: null,
+
+            actualOrder: ""
+          };
+        });
+
+
+    renderHeader();
+
+    renderInventory();
+
+    await loadStockSettings();
+
+
+    setInventoryStatus(
+      "재고조사를 시작할 수 있습니다.",
+      "success"
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    setInventoryStatus(
+      "자료를 불러오지 못했습니다. " +
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =====================================================
+   상단 배송정보
+===================================================== */
+
+function renderHeader() {
+
+  if (!pageData) {
+    return;
+  }
+
+
+  document.getElementById(
+    "orderDateText"
+  ).innerText =
+    formatDateWithDay(
+      pageData.orderDate
+    );
+
+
+  document.getElementById(
+    "deliveryDateText"
+  ).innerText =
+    formatDateWithDay(
+      pageData.deliveryDate
+    );
+
+
+  const stockTypeElement =
+    document.getElementById(
+      "stockTypeText"
+    );
+
+
+  stockTypeElement.innerText =
+    pageData.stockType +
+    " 기준";
+
+
+  stockTypeElement.className =
+    "info-value " +
+    (
+      pageData.stockType === "주말"
+        ? "stock-type-weekend"
+        : "stock-type-weekday"
+    );
+
+
+  document.getElementById(
+    "vendorText"
+  ).innerText =
+    pageData.vendorName ||
+    "MAC";
+}
+
+
+/* =====================================================
+   재고조사 화면
+===================================================== */
+
+function renderInventory() {
+
+  const body =
+    document.getElementById(
+      "inventoryBody"
+    );
+
+
+  if (!inventoryItems.length) {
+
+    body.innerHTML = `
+      <tr>
+        <td
+          colspan="7"
+          class="loading"
+        >
+          등록된 품목이 없습니다.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  const filtered =
+    shortageMode
+      ? inventoryItems.filter(
+          function(item) {
+
+            return (
+              item.recommendedOrder !== null &&
+              Number(
+                item.recommendedOrder
+              ) > 0
+            );
+          }
+        )
+      : inventoryItems;
+
+
+  if (!filtered.length) {
+
+    body.innerHTML = `
+      <tr>
+        <td
+          colspan="7"
+          class="loading"
+        >
+          발주가 필요한 부족 품목이 없습니다.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  body.innerHTML =
+    filtered
+      .map(function(item) {
+
+        let targetHtml;
+
+
+        if (!item.stockConfigured) {
+
+          targetHtml =
+            `<span class="not-configured">
+              미설정
+            </span>`;
+
+        } else {
+
+          targetHtml =
+            `<span class="target-stock">
+              ${numberText(item.targetStock)}
+            </span>`;
+        }
+
+
+        let recommendedHtml;
+
+
+        if (
+          item.recommendedOrder ===
+          null
+        ) {
+
+          recommendedHtml =
+            `<span class="recommended">
+              -
+            </span>`;
+
+        } else if (
+          Number(
+            item.recommendedOrder
+          ) > 0
+        ) {
+
+          recommendedHtml =
+            `<span class="recommended need-order">
+              ${numberText(
+                item.recommendedOrder
+              )}
+            </span>`;
+
+        } else {
+
+          recommendedHtml =
+            `<span class="recommended ok">
+              충분
+            </span>`;
+        }
+
+
+        return `
+          <tr
+            data-code="${escapeHtml(
+              item.code
+            )}"
+          >
+
+            <td class="col-code">
+              ${escapeHtml(
+                item.code
+              )}
+            </td>
+
+            <td class="col-name">
+              ${escapeHtml(
+                item.name
+              )}
+            </td>
+
+            <td class="col-number">
+
+              <input
+                class="stock-input"
+                type="number"
+                min="0"
+                step="0.1"
+                inputmode="decimal"
+
+                value="${escapeHtml(
+                  item.currentStock
+                )}"
+
+                oninput="
+                  updateCurrentStock(
+                    '${escapeJs(item.code)}',
+                    this.value
+                  )
+                "
+              >
+
+            </td>
+
+            <td class="col-number">
+              ${targetHtml}
+            </td>
+
+            <td class="col-number">
+              ${recommendedHtml}
+            </td>
+
+            <td class="col-number">
+
+              <input
+                class="order-input"
+                type="number"
+                min="0"
+                step="0.1"
+                inputmode="decimal"
+
+                ${
+                  item.recommendedOrder === null
+                    ? "disabled"
+                    : ""
+                }
+
+                value="${
+                  item.actualOrder === null ||
+                  item.actualOrder === undefined
+                    ? ""
+                    : escapeHtml(
+                        item.actualOrder
+                      )
+                }"
+
+                oninput="
+                  updateActualOrder(
+                    '${escapeJs(item.code)}',
+                    this.value
+                  )
+                "
+              >
+
+            </td>
+
+            <td class="col-unit">
+              ${escapeHtml(
+                item.unit
+              )}
+            </td>
+
+          </tr>
+        `;
+      })
+      .join("");
+}
+
+
+/* =====================================================
+   현재재고 메모리에 반영
+===================================================== */
+
+function updateCurrentStock(
+  code,
+  value
+) {
+
+  const item =
+    inventoryItems.find(
+      function(row) {
+        return row.code === code;
+      }
+    );
+
+
+  if (!item) {
+    return;
+  }
+
+
+  item.currentStock =
+    value;
+
+
+  calculationDone =
+    false;
+
+
+  item.recommendedOrder =
+    null;
+
+
+  item.actualOrder =
+    "";
+}
+
+
+/* =====================================================
+   실제발주 수정
+===================================================== */
+
+function updateActualOrder(
+  code,
+  value
+) {
+
+  const item =
+    inventoryItems.find(
+      function(row) {
+        return row.code === code;
+      }
+    );
+
+
+  if (!item) {
+    return;
+  }
+
+
+  item.actualOrder =
+    value;
+}
+
+
+/* =====================================================
+   재고조사 저장 + 자동계산
+===================================================== */
+
+async function calculateInventory() {
+
+  if (!pageData) {
+
+    alert(
+      "자료를 아직 불러오는 중입니다."
+    );
+
+    return;
+  }
+
+
+  const workerName =
+    document.getElementById(
+      "workerName"
+    ).value.trim();
+
+
+  if (!workerName) {
+
+    alert(
+      "재고 조사자 이름을 입력해 주세요."
+    );
+
+    return;
+  }
+
+
+  const unconfigured =
+    inventoryItems.filter(
+      function(item) {
+
+        return !item.stockConfigured;
+      }
+    );
+
+
+  if (unconfigured.length) {
+
+    alert(
+      "적정재고가 설정되지 않은 품목이 " +
+      unconfigured.length +
+      "개 있습니다.\n\n" +
+      "먼저 「적정재고 설정」에서 " +
+      "평일·주말 적정재고를 입력해 주세요."
+    );
+
+    openTab(
+      "setting"
+    );
+
+    return;
+  }
+
+
+  const notEntered =
+    inventoryItems.filter(
+      function(item) {
+
+        return (
+          item.currentStock === "" ||
+          item.currentStock === null ||
+          item.currentStock === undefined
+        );
+      }
+    );
+
+
+  if (notEntered.length) {
+
+    alert(
+      "현재재고가 입력되지 않은 품목이 " +
+      notEntered.length +
+      "개 있습니다.\n\n" +
+      "재고가 없는 품목도 0을 입력해 주세요."
+    );
+
+    return;
+  }
+
+
+  setInventoryStatus(
+    "재고조사를 저장하고 권장발주량을 계산하는 중입니다..."
+  );
+
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method:
+            "POST",
+
+          body:
+            JSON.stringify({
+              action:
+                "saveInventory",
+
+              workerName,
+
+              items:
+                inventoryItems.map(
+                  function(item) {
+
+                    return {
+                      code:
+                        item.code,
+
+                      currentStock:
+                        Number(
+                          item.currentStock
+                        ),
+
+                      actualOrder:
+                        ""
+                    };
+                  }
+                )
+            })
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (!result.success) {
+
+      throw new Error(
+        result.message ||
+        "재고조사 저장 실패"
+      );
+    }
+
+
+    const resultMap =
+      new Map();
+
+
+    (result.items || [])
+      .forEach(function(item) {
+
+        resultMap.set(
+          item.code,
+          item
+        );
+      });
+
+
+    inventoryItems =
+      inventoryItems.map(
+        function(item) {
+
+          const calculated =
+            resultMap.get(
+              item.code
+            );
+
+
+          if (!calculated) {
+            return item;
+          }
+
+
+          return {
+            ...item,
+
+            targetStock:
+              calculated.targetStock,
+
+            stockType:
+              calculated.stockType,
+
+            recommendedOrder:
+              calculated.recommendedOrder,
+
+            actualOrder:
+              calculated.actualOrder,
+
+            stockConfigured:
+              calculated.targetStock !==
+              null
+          };
+        }
+      );
+
+
+    calculationDone =
+      true;
+
+
+    shortageMode =
+      false;
+
+
+    renderInventory();
+
+
+    const shortageCount =
+      inventoryItems.filter(
+        function(item) {
+
+          return Number(
+            item.recommendedOrder || 0
+          ) > 0;
+        }
+      ).length;
+
+
+    setInventoryStatus(
+      "재고조사 저장 완료 · 발주 필요 품목 " +
+      shortageCount +
+      "개",
+      "success"
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    setInventoryStatus(
+      "재고조사 처리 중 오류가 발생했습니다. " +
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =====================================================
+   부족 품목만
+===================================================== */
+
+function showShortageOnly() {
+
+  if (!calculationDone) {
+
+    alert(
+      "먼저 재고조사를 저장하고 권장발주량을 계산해 주세요."
+    );
+
+    return;
+  }
+
+
+  shortageMode =
+    true;
+
+
+  renderInventory();
+}
+
+
+function showAllItems() {
+
+  shortageMode =
+    false;
+
+  renderInventory();
+}
+
+
+/* =====================================================
+   적정재고 조회
+===================================================== */
+
+async function loadStockSettings() {
+
+  try {
+
+    const url =
+      API_URL +
+      "?action=getStockSettings" +
+      "&t=" +
+      Date.now();
+
+
+    const response =
+      await fetch(
+        url
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (!result.success) {
+
+      throw new Error(
+        result.message ||
+        "적정재고 조회 실패"
+      );
+    }
+
+
+    stockSettingItems =
+      result.items || [];
+
+
+    renderStockSettings();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    setSettingStatus(
+      "적정재고 정보를 불러오지 못했습니다. " +
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =====================================================
+   적정재고 화면
+===================================================== */
+
+function renderStockSettings() {
+
+  const body =
+    document.getElementById(
+      "settingBody"
+    );
+
+
+  if (!stockSettingItems.length) {
+
+    body.innerHTML = `
+      <tr>
+        <td
+          colspan="5"
+          class="loading"
+        >
+          적정재고 품목이 없습니다.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  body.innerHTML =
+    stockSettingItems
+      .map(function(item) {
+
+        return `
+          <tr>
+
+            <td class="col-code">
+              ${escapeHtml(
+                item.code
+              )}
+            </td>
+
+            <td class="col-name">
+              ${escapeHtml(
+                item.name
+              )}
+            </td>
+
+            <td class="col-number">
+
+              <input
+                class="setting-input"
+                type="number"
+                min="0"
+                step="0.1"
+                inputmode="decimal"
+
+                value="${
+                  item.weekdayStock ===
+                  null
+                    ? ""
+                    : escapeHtml(
+                        item.weekdayStock
+                      )
+                }"
+
+                oninput="
+                  updateSettingValue(
+                    '${escapeJs(item.code)}',
+                    'weekdayStock',
+                    this.value
+                  )
+                "
+              >
+
+            </td>
+
+            <td class="col-number">
+
+              <input
+                class="setting-input"
+                type="number"
+                min="0"
+                step="0.1"
+                inputmode="decimal"
+
+                value="${
+                  item.weekendStock ===
+                  null
+                    ? ""
+                    : escapeHtml(
+                        item.weekendStock
+                      )
+                }"
+
+                oninput="
+                  updateSettingValue(
+                    '${escapeJs(item.code)}',
+                    'weekendStock',
+                    this.value
+                  )
+                "
+              >
+
+            </td>
+
+            <td class="col-unit">
+              ${escapeHtml(
+                item.unit
+              )}
+            </td>
+
+          </tr>
+        `;
+      })
+      .join("");
+}
+
+
+/* =====================================================
+   적정재고 입력
+===================================================== */
+
+function updateSettingValue(
+  code,
+  field,
+  value
+) {
+
+  const item =
+    stockSettingItems.find(
+      function(row) {
+
+        return row.code === code;
+      }
+    );
+
+
+  if (!item) {
+    return;
+  }
+
+
+  item[field] =
+    value;
+}
+
+
+/* =====================================================
+   적정재고 저장
+===================================================== */
+
+async function saveStockSettings() {
+
+  const missing =
+    stockSettingItems.filter(
+      function(item) {
+
+        return (
+          item.weekdayStock === "" ||
+          item.weekdayStock === null ||
+          item.weekdayStock === undefined ||
+          item.weekendStock === "" ||
+          item.weekendStock === null ||
+          item.weekendStock === undefined
+        );
+      }
+    );
+
+
+  if (missing.length) {
+
+    const confirmed =
+      confirm(
+        "평일 또는 주말 적정재고가 비어 있는 품목이 " +
+        missing.length +
+        "개 있습니다.\n\n" +
+        "입력된 품목만 저장하시겠습니까?"
+      );
+
+
+    if (!confirmed) {
+      return;
+    }
+  }
+
+
+  setSettingStatus(
+    "적정재고를 저장하는 중입니다..."
+  );
+
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method:
+            "POST",
+
+          body:
+            JSON.stringify({
+              action:
+                "saveStockSettings",
+
+              items:
+                stockSettingItems.map(
+                  function(item) {
+
+                    return {
+                      code:
+                        item.code,
+
+                      weekdayStock:
+                        item.weekdayStock,
+
+                      weekendStock:
+                        item.weekendStock
+                    };
+                  }
+                )
+            })
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (!result.success) {
+
+      throw new Error(
+        result.message ||
+        "적정재고 저장 실패"
+      );
+    }
+
+
+    setSettingStatus(
+      "적정재고 저장 완료 · " +
+      result.savedCount +
+      "개 품목",
+      "success"
+    );
+
+
+    await loadPageData();
+
+
+    alert(
+      "적정재고가 저장되었습니다."
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    setSettingStatus(
+      "적정재고 저장 중 오류가 발생했습니다. " +
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =====================================================
+   최종 발주
+===================================================== */
+
+async function confirmOrder() {
+
+  if (!calculationDone) {
+
+    alert(
+      "먼저 재고조사를 저장하고 권장발주량을 계산해 주세요."
+    );
+
+    return;
+  }
+
+
+  const workerName =
+    document.getElementById(
+      "workerName"
+    ).value.trim();
+
+
+  if (!workerName) {
+
+    alert(
+      "작성자 이름을 입력해 주세요."
+    );
+
+    return;
+  }
+
+
+  const orderItems =
+    inventoryItems.filter(
+      function(item) {
+
+        return Number(
+          item.actualOrder || 0
+        ) > 0;
+      }
+    );
+
+
+  if (!orderItems.length) {
+
+    alert(
+      "발주할 품목이 없습니다."
+    );
+
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      "총 " +
+      orderItems.length +
+      "개 품목을 최종 발주하시겠습니까?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  setInventoryStatus(
+    "최종 발주를 저장하는 중입니다..."
+  );
+
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method:
+            "POST",
+
+          body:
+            JSON.stringify({
+              action:
+                "saveOrder",
+
+              orderDate:
+                pageData.orderDate,
+
+              storeName:
+                pageData.storeName,
+
+              vendorName:
+                pageData.vendorName,
+
+              stockType:
+                pageData.stockType,
+
+              workerName,
+
+              remark:
+                document.getElementById(
+                  "remark"
+                ).value.trim(),
+
+              items:
+                orderItems.map(
+                  function(item) {
+
+                    return {
+                      code:
+                        item.code,
+
+                      name:
+                        item.name,
+
+                      unit:
+                        item.unit,
+
+                      currentStock:
+                        Number(
+                          item.currentStock || 0
+                        ),
+
+                      targetStock:
+                        item.targetStock,
+
+                      recommendedOrder:
+                        item.recommendedOrder,
+
+                      actualOrder:
+                        Number(
+                          item.actualOrder || 0
+                        )
+                    };
+                  }
+                )
+            })
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (!result.success) {
+
+      throw new Error(
+        result.message ||
+        "최종 발주 저장 실패"
+      );
+    }
+
+
+    lastOrderText =
+      result.orderText || "";
+
+
+    const resultBox =
+      document.getElementById(
+        "orderResult"
+      );
+
+
+    resultBox.innerText =
+      lastOrderText;
+
+
+    resultBox.classList.add(
+      "show"
+    );
+
+
+    setInventoryStatus(
+      "최종 발주 완료 · 발주번호 " +
+      result.orderNumber,
+      "success"
+    );
+
+
+    alert(
+      "발주가 완료되었습니다.\n\n" +
+      "발주번호: " +
+      result.orderNumber
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    setInventoryStatus(
+      "발주 저장 중 오류가 발생했습니다. " +
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =====================================================
+   발주문 복사
+===================================================== */
+
+function copyOrderText() {
+
+  if (!lastOrderText) {
+
+    alert(
+      "먼저 최종 발주를 완료해 주세요."
+    );
+
+    return;
+  }
+
+
+  navigator.clipboard
+    .writeText(
+      lastOrderText
+    )
+    .then(function() {
+
+      alert(
+        "발주문이 복사되었습니다."
+      );
+    })
+    .catch(function() {
+
+      alert(
+        "자동 복사에 실패했습니다."
+      );
+    });
+}
+
+
+/* =====================================================
+   상태 표시
+===================================================== */
+
+function setInventoryStatus(
+  message,
+  type = ""
+) {
+
+  const element =
+    document.getElementById(
+      "inventoryStatus"
+    );
+
+
+  element.className =
+    "status-bar" +
+    (
+      type
+        ? " " + type
+        : ""
+    );
+
+
+  element.innerText =
+    message;
+}
+
+
+function setSettingStatus(
+  message,
+  type = ""
+) {
+
+  const element =
+    document.getElementById(
+      "settingStatus"
+    );
+
+
+  element.className =
+    "status-bar" +
+    (
+      type
+        ? " " + type
+        : ""
+    );
+
+
+  element.innerText =
+    message;
+}
+
+
+/* =====================================================
+   날짜
+===================================================== */
+
+function formatDateWithDay(
+  dateText
+) {
+
+  if (!dateText) {
+    return "-";
+  }
+
+
+  const parts =
+    dateText.split("-");
+
+
+  const date =
+    new Date(
+      Number(parts[0]),
+      Number(parts[1]) - 1,
+      Number(parts[2])
+    );
+
+
+  const days = [
+    "일",
+    "월",
+    "화",
+    "수",
+    "목",
+    "금",
+    "토"
+  ];
+
+
+  return (
+    Number(parts[1]) +
+    "/" +
+    Number(parts[2]) +
+    "(" +
+    days[
+      date.getDay()
+    ] +
+    ")"
+  );
+}
+
+
+/* =====================================================
+   표시
+===================================================== */
+
+function numberText(
+  value
+) {
+
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "-";
+  }
+
+
+  return Number(value)
+    .toLocaleString(
+      "ko-KR",
+      {
+        maximumFractionDigits: 2
+      }
+    );
+}
+
+
+/* =====================================================
+   문자열 안전처리
+===================================================== */
+
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value === null ||
+    value === undefined
+      ? ""
+      : value
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+}
+
+
+function escapeJs(
+  value
+) {
+
+  return String(value)
+    .replace(
+      /\\/g,
+      "\\\\"
+    )
+    .replace(
+      /'/g,
+      "\\'"
+    );
+}
+
+</script>
+
+</body>
+</html>
