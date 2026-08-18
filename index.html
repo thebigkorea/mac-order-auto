@@ -314,7 +314,7 @@ button {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1050px;
+  table-layout: fixed;
 }
 
 thead th {
@@ -532,10 +532,7 @@ tbody tr:hover td {
     align-items: flex-start;
   }
 
-  table {
-    min-width: 950px;
-  }
-
+  
   .col-name {
     min-width: 260px;
   }
@@ -570,6 +567,114 @@ tbody tr:hover td {
 
   .worker-row {
     padding: 0 14px 16px;
+  }
+}
+
+/* =========================
+   재고조사 / 발주확인 모바일 최적화
+========================= */
+
+.inventory-table th:nth-child(1),
+.inventory-table td:nth-child(1) {
+  width: 52%;
+}
+
+.inventory-table th:nth-child(2),
+.inventory-table td:nth-child(2) {
+  width: 18%;
+}
+
+.inventory-table th:nth-child(3),
+.inventory-table td:nth-child(3) {
+  width: 18%;
+}
+
+.inventory-table th:nth-child(4),
+.inventory-table td:nth-child(4) {
+  width: 12%;
+}
+
+
+.order-table th:nth-child(1),
+.order-table td:nth-child(1) {
+  width: 52%;
+}
+
+.order-table th:nth-child(2),
+.order-table td:nth-child(2) {
+  width: 16%;
+}
+
+.order-table th:nth-child(3),
+.order-table td:nth-child(3) {
+  width: 20%;
+}
+
+.order-table th:nth-child(4),
+.order-table td:nth-child(4) {
+  width: 12%;
+}
+
+
+@media (max-width: 560px) {
+
+  .table-wrap {
+    overflow-x: hidden;
+  }
+
+  .inventory-table,
+  .order-table {
+    min-width: 0;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .inventory-table th,
+  .inventory-table td,
+  .order-table th,
+  .order-table td {
+    padding: 9px 4px;
+    font-size: 12px;
+  }
+
+  .inventory-table .col-name,
+  .order-table .col-name {
+    min-width: 0;
+    width: auto;
+    font-size: 12px;
+    line-height: 1.35;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .inventory-table .col-number,
+  .order-table .col-number {
+    width: auto;
+  }
+
+  .inventory-table .col-unit,
+  .order-table .col-unit {
+    width: auto;
+    font-size: 11px;
+  }
+
+  .stock-input,
+  .order-input {
+    width: 100%;
+    max-width: 64px;
+    height: 38px;
+    padding: 4px;
+    font-size: 14px;
+  }
+
+  .target-stock,
+  .recommended {
+    font-size: 12px;
+  }
+
+  .recommended {
+    min-width: 42px;
+    padding: 5px 6px;
   }
 }
 
@@ -681,30 +786,7 @@ tbody tr:hover td {
           </p>
         </div>
 
-        <div class="actions">
-
-          <button
-            class="btn btn-light"
-            onclick="showAllItems()"
-          >
-            전체 품목
-          </button>
-
-          <button
-            class="btn btn-warning"
-            onclick="showShortageOnly()"
-          >
-            부족 품목만
-          </button>
-
-          <button
-            class="btn btn-blue"
-            onclick="calculateInventory()"
-          >
-            재고조사 저장 · 자동계산
-          </button>
-
-        </div>
+        
 
       </div>
 
@@ -719,92 +801,194 @@ tbody tr:hover td {
 
 
       
-      <div class="table-wrap">
+      <!-- ================================
+     1단계 : 재고조사
+================================ -->
 
-        <table>
+<div id="inventoryStep">
 
-          <thead>
-            <tr>
-              <th>코드</th>
-              <th>품목</th>
-              <th>현재재고</th>
-              <th>적정재고</th>
-              <th>권장발주</th>
-              <th>실제발주</th>
-              <th>단위</th>
-            </tr>
-          </thead>
+  <div class="table-wrap">
 
-          <tbody id="inventoryBody">
+    <table class="inventory-table">
 
-            <tr>
-              <td
-                colspan="7"
-                class="loading"
-              >
-                품목을 불러오는 중입니다...
-              </td>
-            </tr>
+      <thead>
+        <tr>
+          <th>품목</th>
+          <th>현재재고</th>
+          <th>적정재고</th>
+          <th>단위</th>
+        </tr>
+      </thead>
 
-          </tbody>
+      <tbody id="inventoryBody">
 
-        </table>
+        <tr>
+          <td
+            colspan="4"
+            class="loading"
+          >
+            품목을 불러오는 중입니다...
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+
+  <div
+    id="inventoryStatus"
+    class="status-bar"
+  >
+    재고조사 대기 중
+  </div>
+
+
+  <div
+    style="
+      padding:0 20px 20px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    "
+  >
+
+    <button
+      class="btn btn-light"
+      onclick="saveInventoryDraft()"
+    >
+      💾 임시저장
+    </button>
+
+    <button
+      class="btn btn-blue"
+      onclick="calculateInventory()"
+    >
+      재고조사 완료 · 발주계산
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- ================================
+     2단계 : 발주확인
+================================ -->
+
+<div
+  id="orderStep"
+  style="display:none;"
+>
+
+  <div class="notice">
+    <strong>발주수량 확인</strong><br>
+    재고조사 결과를 기준으로 권장 발주수량을 계산했습니다.
+    실제 발주수량은 필요하면 직접 수정하세요.
+  </div>
+
+
+  <div class="table-wrap">
+
+    <table class="order-table">
+
+      <thead>
+        <tr>
+          <th>품목</th>
+          <th>권장발주</th>
+          <th>실제발주</th>
+          <th>단위</th>
+        </tr>
+      </thead>
+
+      <tbody id="orderReviewBody">
+
+        <tr>
+          <td
+            colspan="4"
+            class="loading"
+          >
+            발주수량을 계산하는 중입니다...
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+
+  <div
+    style="
+      padding:18px 20px 6px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    "
+  >
+
+    <button
+      class="btn btn-light"
+      onclick="backToInventory()"
+    >
+      ← 재고조사로 돌아가기
+    </button>
+
+  </div>
+
+
+  <div class="worker-row">
+
+    <label for="remark">
+      발주 비고
+    </label>
+
+    <textarea
+      id="remark"
+      placeholder="거래처에 전달할 요청사항이 있으면 입력하세요."
+    ></textarea>
+
+  </div>
+
+
+  <div
+    style="
+      padding:0 20px 20px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    "
+  >
+
+    <button
+      class="btn btn-green"
+      onclick="confirmOrder()"
+    >
+      최종 발주확정
+    </button>
+
+    <button
+      class="btn btn-light"
+      onclick="copyOrderText()"
+    >
+      발주문 복사
+    </button>
+
+  </div>
+
+
+  <div
+    id="orderResult"
+    class="order-result"
+  ></div>
+
+</div>
 
       </div>
-
-
-      <div
-        id="inventoryStatus"
-        class="status-bar"
-      >
-        재고조사 대기 중
-      </div>
-
-
-      <div class="worker-row">
-
-        <label for="remark">
-          발주 비고
-        </label>
-
-        <textarea
-          id="remark"
-          placeholder="거래처에 전달할 요청사항이 있으면 입력하세요."
-        ></textarea>
-
-      </div>
-
-
-      <div
-        style="
-          padding:0 20px 20px;
-          display:flex;
-          gap:10px;
-          flex-wrap:wrap;
-        "
-      >
-
-        <button
-          class="btn btn-green"
-          onclick="confirmOrder()"
-        >
-          최종 발주확정
-        </button>
-
-        <button
-          class="btn btn-light"
-          onclick="copyOrderText()"
-        >
-          발주문 복사
-        </button>
-
-      </div>
-
-
-      <div
-        id="orderResult"
-        class="order-result"
-      ></div>
+          
 
     </div>
 
@@ -1162,15 +1346,11 @@ function renderInventory() {
       "inventoryBody"
     );
 
-
   if (!inventoryItems.length) {
 
     body.innerHTML = `
       <tr>
-        <td
-          colspan="7"
-          class="loading"
-        >
+        <td colspan="4" class="loading">
           등록된 품목이 없습니다.
         </td>
       </tr>
@@ -1179,115 +1359,34 @@ function renderInventory() {
     return;
   }
 
-
-  const filtered =
-    shortageMode
-      ? inventoryItems.filter(
-          function(item) {
-
-            return (
-              item.recommendedOrder !== null &&
-              Number(
-                item.recommendedOrder
-              ) > 0
-            );
-          }
-        )
-      : inventoryItems;
-
-
-  if (!filtered.length) {
-
-    body.innerHTML = `
-      <tr>
-        <td
-          colspan="7"
-          class="loading"
-        >
-          발주가 필요한 부족 품목이 없습니다.
-        </td>
-      </tr>
-    `;
-
-    return;
-  }
-
-
   body.innerHTML =
-    filtered
+    inventoryItems
       .map(function(item) {
 
         let targetHtml;
 
-
         if (!item.stockConfigured) {
 
-          targetHtml =
-            `<span class="not-configured">
+          targetHtml = `
+            <span class="not-configured">
               미설정
-            </span>`;
+            </span>
+          `;
 
         } else {
 
-          targetHtml =
-            `<span class="target-stock">
+          targetHtml = `
+            <span class="target-stock">
               ${numberText(item.targetStock)}
-            </span>`;
+            </span>
+          `;
         }
-
-
-        let recommendedHtml;
-
-
-        if (
-          item.recommendedOrder ===
-          null
-        ) {
-
-          recommendedHtml =
-            `<span class="recommended">
-              -
-            </span>`;
-
-        } else if (
-          Number(
-            item.recommendedOrder
-          ) > 0
-        ) {
-
-          recommendedHtml =
-            `<span class="recommended need-order">
-              ${numberText(
-                item.recommendedOrder
-              )}
-            </span>`;
-
-        } else {
-
-          recommendedHtml =
-            `<span class="recommended ok">
-              충분
-            </span>`;
-        }
-
 
         return `
-          <tr
-            data-code="${escapeHtml(
-              item.code
-            )}"
-          >
-
-            <td class="col-code">
-              ${escapeHtml(
-                item.code
-              )}
-            </td>
+          <tr data-code="${escapeHtml(item.code)}">
 
             <td class="col-name">
-              ${escapeHtml(
-                item.name
-              )}
+              ${escapeHtml(item.name)}
             </td>
 
             <td class="col-number">
@@ -1299,9 +1398,7 @@ function renderInventory() {
                 step="0.1"
                 inputmode="decimal"
 
-                value="${escapeHtml(
-                  item.currentStock
-                )}"
+                value="${escapeHtml(item.currentStock)}"
 
                 oninput="
                   updateCurrentStock(
@@ -1317,6 +1414,101 @@ function renderInventory() {
               ${targetHtml}
             </td>
 
+            <td class="col-unit">
+              ${escapeHtml(item.unit)}
+            </td>
+
+          </tr>
+        `;
+      })
+      .join("");
+}
+
+function renderOrderReview() {
+
+  const body =
+    document.getElementById(
+      "orderReviewBody"
+    );
+
+  const orderItems =
+    inventoryItems
+      .filter(function(item) {
+
+        return (
+          item.recommendedOrder !== null &&
+          item.recommendedOrder !== undefined
+        );
+      })
+      .sort(function(a, b) {
+
+        return (
+          Number(b.recommendedOrder || 0) -
+          Number(a.recommendedOrder || 0)
+        );
+      });
+
+  if (!orderItems.length) {
+
+    body.innerHTML = `
+      <tr>
+        <td colspan="4" class="loading">
+          계산된 발주자료가 없습니다.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  body.innerHTML =
+    orderItems
+      .map(function(item) {
+
+        let recommendedHtml;
+
+        if (
+          Number(
+            item.recommendedOrder || 0
+          ) > 0
+        ) {
+
+          recommendedHtml = `
+            <span class="recommended need-order">
+              ${numberText(item.recommendedOrder)}
+            </span>
+          `;
+
+        } else {
+
+          recommendedHtml = `
+            <span class="recommended ok">
+              충분
+            </span>
+          `;
+        }
+
+        return `
+          <tr>
+
+            <td class="col-name">
+
+              ${escapeHtml(item.name)}
+
+              <div
+                style="
+                  margin-top:4px;
+                  font-size:12px;
+                  color:#667085;
+                  font-weight:500;
+                "
+              >
+                현재 ${numberText(item.currentStock)}
+                · 적정 ${numberText(item.targetStock)}
+              </div>
+
+            </td>
+
             <td class="col-number">
               ${recommendedHtml}
             </td>
@@ -1330,20 +1522,12 @@ function renderInventory() {
                 step="0.1"
                 inputmode="decimal"
 
-                ${
-                  item.recommendedOrder === null
-                    ? "disabled"
-                    : ""
-                }
-
-                value="${
+                value="${escapeHtml(
                   item.actualOrder === null ||
                   item.actualOrder === undefined
                     ? ""
-                    : escapeHtml(
-                        item.actualOrder
-                      )
-                }"
+                    : item.actualOrder
+                )}"
 
                 oninput="
                   updateActualOrder(
@@ -1356,15 +1540,33 @@ function renderInventory() {
             </td>
 
             <td class="col-unit">
-              ${escapeHtml(
-                item.unit
-              )}
+              ${escapeHtml(item.unit)}
             </td>
 
           </tr>
         `;
       })
       .join("");
+}
+
+function backToInventory() {
+
+  document.getElementById(
+    "orderStep"
+  ).style.display =
+    "none";
+
+  document.getElementById(
+    "inventoryStep"
+  ).style.display =
+    "block";
+
+  renderInventory();
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
 
@@ -1596,14 +1798,24 @@ async function calculateInventory() {
 
 
     calculationDone =
-      true;
+  true;
 
+renderOrderReview();
 
-    shortageMode =
-      false;
+document.getElementById(
+  "inventoryStep"
+).style.display =
+  "none";
 
+document.getElementById(
+  "orderStep"
+).style.display =
+  "block";
 
-    renderInventory();
+window.scrollTo({
+  top: 0,
+  behavior: "smooth"
+});
 
 
     const shortageCount =
