@@ -1255,11 +1255,32 @@ async function loadPageData() {
         });
 
 
+    /*
+     * 적정재고 설정 화면도 getOrderPageData 결과를 그대로 사용합니다.
+     * 별도의 getStockSettings 재호출을 하지 않으므로,
+     * 재고조사 화면과 적정재고 설정 화면의 품목 순서가 항상 동일합니다.
+     */
+    stockSettingItems =
+      (result.items || [])
+        .map(function(item) {
+
+          return {
+            code: item.code,
+            name: item.name,
+            unit: item.unit,
+            active: item.active,
+            sortOrder: item.sortOrder,
+            weekdayStock: item.weekdayStock,
+            weekendStock: item.weekendStock
+          };
+        });
+
+
     renderHeader();
 
     renderInventory();
 
-    await loadStockSettings();
+    renderStockSettings();
 
     await loadInventoryDraft();
 
@@ -1896,84 +1917,36 @@ function showAllItems() {
 
 async function loadStockSettings() {
 
-  try {
+  /*
+   * 별도 API 호출 없이 이미 받아온 pageData.items를 사용합니다.
+   * 이 함수가 다른 곳에서 호출되더라도 동일한 정렬순서를 유지합니다.
+   */
+  if (!pageData || !Array.isArray(pageData.items)) {
 
-    const url =
-      API_URL +
-      "?action=getStockSettings" +
-      "&t=" +
-      Date.now();
-
-
-    const response =
-      await fetch(
-        url
-      );
-
-
-    const result =
-      await response.json();
-
-
-    if (!result.success) {
-
-      throw new Error(
-        result.message ||
-        "적정재고 조회 실패"
-      );
-    }
-
-
-    const sortMap =
-  new Map();
-
-inventoryItems.forEach(
-  function(item, index) {
-
-    sortMap.set(
-      item.code,
-      item.sortOrder !== undefined
-        ? Number(item.sortOrder)
-        : index + 1
-    );
+    stockSettingItems = [];
+    renderStockSettings();
+    return;
   }
-);
 
 
-stockSettingItems =
-  (result.items || [])
-    .slice()
-    .sort(
-      function(a, b) {
+  stockSettingItems =
+    pageData.items.map(
+      function(item) {
 
-        const orderA =
-          sortMap.has(a.code)
-            ? sortMap.get(a.code)
-            : 999999;
-
-        const orderB =
-          sortMap.has(b.code)
-            ? sortMap.get(b.code)
-            : 999999;
-
-        return orderA - orderB;
+        return {
+          code: item.code,
+          name: item.name,
+          unit: item.unit,
+          active: item.active,
+          sortOrder: item.sortOrder,
+          weekdayStock: item.weekdayStock,
+          weekendStock: item.weekendStock
+        };
       }
     );
 
 
-    renderStockSettings();
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    setSettingStatus(
-      "적정재고 정보를 불러오지 못했습니다. " +
-      error.message,
-      "error"
-    );
-  }
+  renderStockSettings();
 }
 
 
