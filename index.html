@@ -1924,8 +1924,41 @@ async function loadStockSettings() {
     }
 
 
-    stockSettingItems =
-      result.items || [];
+    const sortMap =
+  new Map();
+
+inventoryItems.forEach(
+  function(item, index) {
+
+    sortMap.set(
+      item.code,
+      item.sortOrder !== undefined
+        ? Number(item.sortOrder)
+        : index + 1
+    );
+  }
+);
+
+
+stockSettingItems =
+  (result.items || [])
+    .slice()
+    .sort(
+      function(a, b) {
+
+        const orderA =
+          sortMap.has(a.code)
+            ? sortMap.get(a.code)
+            : 999999;
+
+        const orderB =
+          sortMap.has(b.code)
+            ? sortMap.get(b.code)
+            : 999999;
+
+        return orderA - orderB;
+      }
+    );
 
 
     renderStockSettings();
