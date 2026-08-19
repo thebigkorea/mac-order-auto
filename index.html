@@ -1655,32 +1655,28 @@ async function calculateInventory() {
   }
 
 
-  
+  /*
+   * 이번에 실제로 재고를 입력한 품목만 계산 대상
+   * 빈칸 품목은 조사하지 않은 것으로 보고 제외
+   */
+  const enteredItems =
+    inventoryItems.filter(
+      function(item) {
 
-  
-  const notEntered =
-  inventoryItems.filter(
-    function(item) {
-
-      return (
-        item.stockConfigured &&
-        (
-          item.currentStock === "" ||
-          item.currentStock === null ||
-          item.currentStock === undefined
-        )
-      );
-    }
-  );
+        return (
+          item.stockConfigured &&
+          item.currentStock !== "" &&
+          item.currentStock !== null &&
+          item.currentStock !== undefined
+        );
+      }
+    );
 
 
-  if (notEntered.length) {
+  if (!enteredItems.length) {
 
     alert(
-      "현재재고가 입력되지 않은 품목이 " +
-      notEntered.length +
-      "개 있습니다.\n\n" +
-      "재고가 없는 품목도 0을 입력해 주세요."
+      "현재재고를 입력한 품목이 없습니다."
     );
 
     return;
@@ -1688,7 +1684,7 @@ async function calculateInventory() {
 
 
   setInventoryStatus(
-    "재고조사를 저장하고 권장발주량을 계산하는 중입니다..."
+    "입력한 품목의 재고를 저장하고 권장발주량을 계산하는 중입니다..."
   );
 
 
@@ -1706,14 +1702,8 @@ async function calculateInventory() {
               action:
                 "saveInventory",
 
-              
-
               items:
-                inventoryItems
-                 .filter(function(item) {
-                   return item.stockConfigured;
-                })
-                .map(
+                enteredItems.map(
                   function(item) {
 
                     return {
@@ -1772,8 +1762,21 @@ async function calculateInventory() {
             );
 
 
+          /*
+           * 이번에 입력하지 않은 품목은
+           * 계산하지 않고 그대로 둠
+           */
           if (!calculated) {
-            return item;
+
+            return {
+              ...item,
+
+              recommendedOrder:
+                null,
+
+              actualOrder:
+                ""
+            };
           }
 
 
@@ -1801,39 +1804,48 @@ async function calculateInventory() {
 
 
     calculationDone =
-  true;
+      true;
 
-renderOrderReview();
 
-document.getElementById(
-  "inventoryStep"
-).style.display =
-  "none";
+    renderOrderReview();
 
-document.getElementById(
-  "orderStep"
-).style.display =
-  "block";
 
-window.scrollTo({
-  top: 0,
-  behavior: "smooth"
-});
+    document.getElementById(
+      "inventoryStep"
+    ).style.display =
+      "none";
+
+
+    document.getElementById(
+      "orderStep"
+    ).style.display =
+      "block";
+
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
 
 
     const shortageCount =
       inventoryItems.filter(
         function(item) {
 
-          return Number(
-            item.recommendedOrder || 0
-          ) > 0;
+          return (
+            item.recommendedOrder !== null &&
+            Number(
+              item.recommendedOrder || 0
+            ) > 0
+          );
         }
       ).length;
 
 
     setInventoryStatus(
-      "재고조사 저장 완료 · 발주 필요 품목 " +
+      "재고조사 저장 완료 · 입력 " +
+      enteredItems.length +
+      "개 품목 · 발주 필요 " +
       shortageCount +
       "개",
       "success"
@@ -1851,7 +1863,6 @@ window.scrollTo({
     );
   }
 }
-
 
 /* =====================================================
    부족 품목만
