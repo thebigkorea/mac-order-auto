@@ -1435,21 +1435,14 @@ function renderOrderReview() {
     );
 
   const orderItems =
-    inventoryItems
-      .filter(function(item) {
+  inventoryItems
+    .filter(function(item) {
 
-        return (
-          item.recommendedOrder !== null &&
-          item.recommendedOrder !== undefined
-        );
-      })
-      .sort(function(a, b) {
-
-        return (
-          Number(b.recommendedOrder || 0) -
-          Number(a.recommendedOrder || 0)
-        );
-      });
+      return (
+        item.recommendedOrder !== null &&
+        item.recommendedOrder !== undefined
+      );
+    });
 
   if (!orderItems.length) {
 
